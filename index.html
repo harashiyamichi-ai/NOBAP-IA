@@ -311,6 +311,168 @@
     const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
     const audioBtn = document.getElementById('audio-btn');
+    const historyList = document.querySelector('.history-list');
+
+    const STORAGE_KEY = 'nobap_jarvis_conversations_v1';
+    const ACTIVE_KEY = 'nobap_jarvis_active_conversation_v1';
+
+    function uid() {
+        return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+
+    function loadConversations() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            const parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveConversations(conversations) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+    }
+
+    function loadActiveConversationId() {
+        return localStorage.getItem(ACTIVE_KEY) || null;
+    }
+
+    function saveActiveConversationId(id) {
+        localStorage.setItem(ACTIVE_KEY, id);
+    }
+
+    function getActiveConversation(conversations) {
+        const activeId = loadActiveConversationId();
+        return conversations.find(c => c.id === activeId) || null;
+    }
+
+    let conversations = loadConversations();
+
+    if (!conversations.length) {
+        // cria uma conversa inicial
+        const firstId = uid();
+        conversations = [
+            {
+                id: firstId,
+                createdAt: Date.now(),
+                messages: [
+                    {
+                        sender: 'assistant',
+                        text: 'Sistemas integrados. Protocolo de voz disponível. O que você precisa, comandante?'
+                    }
+                ]
+            }
+        ];
+        saveConversations(conversations);
+        saveActiveConversationId(firstId);
+    } else if (!loadActiveConversationId() || !conversations.some(c => c.id === loadActiveConversationId())) {
+        saveActiveConversationId(conversations[0].id);
+    }
+
+    let activeConversationId = loadActiveConversationId();
+
+    function setActiveConversation(id) {
+        activeConversationId = id;
+        saveActiveConversationId(id);
+        render();
+    }
+
+    function getActiveConversationObj() {
+        return conversations.find(c => c.id === activeConversationId) || null;
+    }
+
+    function persistActiveConversation(messages) {
+        const idx = conversations.findIndex(c => c.id === activeConversationId);
+        if (idx === -1) return;
+        conversations[idx].messages = messages;
+        saveConversations(conversations);
+    }
+
+    function escapeHtml(text) {
+        return String(text)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '<')
+            .replaceAll('>', '>')
+            .replaceAll('"', '"')
+            .replaceAll("'", '&#039;');
+    }
+
+    function formatHistoryLabel(messages) {
+        const firstUser = messages.find(m => m.sender === 'user' && m.text && m.text.trim());
+        if (firstUser) return firstUser.text.trim().slice(0, 28) + (firstUser.text.trim().length > 28 ? '…' : '');
+        return 'Nova conversa';
+    }
+
+    function renderHistory() {
+        if (!historyList) return;
+        historyList.innerHTML = '';
+
+        // mais recente no topo
+        const sorted = [...conversations].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        for (const conv of sorted) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.style.width = '100%';
+            btn.style.textAlign = 'left';
+            btn.style.background = 'transparent';
+            btn.style.border = '1px solid rgba(155, 89, 182, 0.15)';
+            btn.style.borderRadius = '12px';
+            btn.style.padding = '10px 12px';
+            btn.style.color = 'white';
+            btn.style.marginBottom = '10px';
+            btn.style.cursor = 'pointer';
+            btn.style.fontWeight = '600';
+            btn.style.letterSpacing = '0.2px';
+            btn.style.opacity = conv.id === activeConversationId ? '1' : '0.75';
+            btn.style.boxShadow = conv.id === activeConversationId ? '0 0 20px rgba(155, 89, 182, 0.25)' : 'none';
+
+            btn.innerHTML = `
+                ${escapeHtml(formatHistoryLabel(conv.messages || []))}
+            `;
+
+            btn.onclick = () => setActiveConversation(conv.id);
+            historyList.appendChild(btn);
+        }
+    }
+
+    function renderMessages() {
+        const conv = getActiveConversationObj();
+        chatBox.innerHTML = '';
+
+        if (!conv || !conv.messages || !conv.messages.length) {
+            // fallback (não deve acontecer)
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper assistant';
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = 'Sistemas sincronizados.';
+            wrapper.appendChild(content);
+            chatBox.appendChild(wrapper);
+            return;
+        }
+
+        for (const m of conv.messages) {
+            const sender = m.sender === 'user' ? 'user' : 'assistant';
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${sender}`;
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = m.text || '';
+
+            wrapper.appendChild(content);
+            chatBox.appendChild(wrapper);
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function render() {
+        renderHistory();
+        renderMessages();
+    }
+
 
     let recognition;
     let isRecording = false;
@@ -399,7 +561,7 @@
         return content;
     }
 
-    function typeEffect(element, text, speed = 15) {
+    function typeEffect(element, text, speed = 15, onDone) {
         element.textContent = "";
         let i = 0;
         function type() {
@@ -408,14 +570,24 @@
                 i++;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 setTimeout(type, speed);
+            } else {
+                if (typeof onDone === 'function') onDone();
             }
         }
         type();
     }
 
+
     async function sendMessage() {
         const text = userInput.value.trim();
         if (!text) return;
+
+        const conv = getActiveConversationObj();
+        if (!conv) return;
+
+        const nextMessagesAfterUser = [...(conv.messages || [])];
+        nextMessagesAfterUser.push({ sender: 'user', text });
+        persistActiveConversation(nextMessagesAfterUser);
 
         appendMessage(text, 'user');
         userInput.value = '';
@@ -451,8 +623,14 @@
                 '').trim();
 
             if (rawResponse) {
+                const nextMessagesAfterAssistant = [...(getActiveConversationObj()?.messages || nextMessagesAfterUser)];
+
                 // 1. Inicia o efeito visual de digitação
-                typeEffect(content, rawResponse);
+                typeEffect(content, rawResponse, 15, () => {
+                    const convNow = getActiveConversationObj();
+                    const msgs = convNow ? convNow.messages || [] : [];
+                    persistActiveConversation([...msgs, { sender: 'assistant', text: rawResponse }]);
+                });
 
                 // 2. Aciona o áudio para o Jarvis falar a resposta junto!
                 jarvisSpeak(rawResponse);
@@ -466,6 +644,7 @@
             content.textContent = "Falha de link com a matriz de processamento.";
         }
     }
+
 
     function clearChat() {
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
