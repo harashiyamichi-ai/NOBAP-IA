@@ -36,7 +36,18 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
-        return res.status(200).json(data);
+
+        // Normaliza para o formato usado no frontend (content direto)
+        const content =
+            data?.choices?.[0]?.message?.content ??
+            data?.choices?.[0]?.text ??
+            null;
+
+        return res.status(200).json({
+            content,
+            raw: data,
+        });
+
 
     } catch (error) {
         console.error(error);

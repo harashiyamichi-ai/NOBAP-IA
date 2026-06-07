@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis // Nobap Intelligence</title>
     <style>
+
         /* --- FUTURISTIC CORE VARIABLES (Nobap Premium) --- */
         * {
             margin: 0;
@@ -106,21 +107,23 @@
         .message-wrapper {
             width: 100%;
             display: flex;
-            justify-content: center;
-            padding: 24px 20px;
+            padding: 10px 20px;
             animation: fadeIn 0.4s ease-out;
         }
 
         .message-wrapper.assistant {
-            background-color: rgba(19, 19, 28, 0.4);
-            border-top: 1px solid rgba(155, 89, 182, 0.05);
-            border-bottom: 1px solid rgba(155, 89, 182, 0.05);
+            justify-content: flex-start;
+        }
+
+        .message-wrapper.user {
+            justify-content: flex-end;
         }
 
         .message-content {
             max-width: 768px;
             width: 100%;
             font-size: 16px;
+
             line-height: 1.62;
             word-wrap: break-word;
             white-space: pre-wrap;
@@ -441,18 +444,23 @@
             });
 
             const data = await response.json();
-            
-            if (data.choices && data.choices[0]) {
-                const rawResponse = data.choices[0].message.content.trim();
-                
+
+            const rawResponse = (data?.content ??
+                data?.choices?.[0]?.message?.content ??
+                data?.choices?.[0]?.text ??
+                '').trim();
+
+            if (rawResponse) {
                 // 1. Inicia o efeito visual de digitação
                 typeEffect(content, rawResponse);
-                
+
                 // 2. Aciona o áudio para o Jarvis falar a resposta junto!
                 jarvisSpeak(rawResponse);
             } else {
-                content.textContent = "Erro de decodificação na resposta do Jarvis.";
+                console.error('Resposta inesperada:', data);
+                content.textContent = "Erro ao decodificar a resposta do Jarvis.";
             }
+
         } catch (error) {
             console.error(error);
             content.textContent = "Falha de link com a matriz de processamento.";
