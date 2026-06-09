@@ -841,6 +841,8 @@
 
         recognition.onerror = (event) => {
             console.error("Erro no reconhecimento de voz: ", event.error);
+            isRecording = false;
+            audioBtn.classList.remove('recording');
         };
     } else {
         audioBtn.style.display = 'none'; // Esconde o botão se o navegador não der suporte
