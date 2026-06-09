@@ -493,24 +493,49 @@
 <!-- APP SHELL (após login) -->
 <div id="app-shell" class="container" style="display:none;">
     <aside class="sidebar" id="sidebar">
-        <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Abrir/Fechar Nobap">
+        <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Abrir/Fechar Nobap" type="button">
             <span class="sidebar-toggle-text">Nobap</span><span class="sidebar-toggle-underscore">_</span>
         </button>
 
-        <div class="sidebar-inner" style="display:flex;flex-direction:column;gap:20px;">
-            <div class="brand">Nobap<span>_</span></div>
-            <button class="new-chat-btn" onclick="clearChat()">+ Novo Registro</button>
-            <div style="display:flex;gap:10px;">
-                <button id="logout-btn" style="flex:1;background:rgba(155, 89, 182, 0.12);border:1px solid rgba(155, 89, 182, 0.45);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;display:none;">Sair</button>
+        <div class="sidebar-inner" style="display:flex;flex-direction:column;gap:18px; padding-top:54px;">
+            <div class="brand" style="margin-top:8px;">Nobap<span>_</span></div>
+
+            <div class="menu-actions">
+                <button class="new-chat-btn" onclick="startNewConversation()">+ Nova conversa</button>
             </div>
 
             <div class="history-list"></div>
 
-            <div style="display:flex;gap:10px;">
-                <button id="theme-toggle-btn" style="flex:1;background:rgba(155, 89, 182, 0.12);border:1px solid rgba(155, 89, 182, 0.45);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;">Tema: Escuro</button>
+            <div class="config-block">
+                <div class="config-row">
+                    <div class="account-pill" id="account-pill" style="padding:10px 12px;border-radius:14px;border:1px solid rgba(155,89,182,0.25);background:rgba(155,89,182,0.08);margin-bottom:10px;">
+                        <div style="font-weight:900;letter-spacing:0.3px;">Conta</div>
+                        <div id="account-email" style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:6px;word-break:break-word;">—</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                    <button id="logout-btn" style="flex:1;background:rgba(155, 89, 182, 0.12);border:1px solid rgba(155, 89, 182, 0.45);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;display:none;" type="button">Sair</button>
+                </div>
+
+                <div style="display:flex;gap:10px; margin-top:10px;">
+                    <button id="terms-btn" style="flex:1;background:transparent;border:1px solid rgba(155, 89, 182, 0.35);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;" type="button">Termos de uso</button>
+                    <button id="support-btn" style="flex:1;background:transparent;border:1px solid rgba(155, 89, 182, 0.35);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;" type="button">Suporte</button>
+                </div>
+
+                <div style="display:flex;gap:10px; margin-top:10px;">
+                    <button id="theme-toggle-btn" style="flex:1;background:rgba(155, 89, 182, 0.12);border:1px solid rgba(155, 89, 182, 0.45);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;" type="button">Tema: Escuro</button>
+                </div>
+
+                <div class="divider" style="height:1px;background:rgba(155,89,182,0.22);margin:14px 0;"></div>
+
+                <div style="color:rgba(255,255,255,0.75);font-size:12px;line-height:1.4;">
+                    Preferências salvas localmente.
+                </div>
             </div>
         </div>
     </aside>
+
 
     <main class="chat-area">
         <div class="messages-container" id="chat-box">
@@ -1050,13 +1075,49 @@
     }
 
 
+    function startNewConversation() {
+        // recria conversa local
+        const firstId = uid();
+        const nextConversations = [
+            {
+                id: firstId,
+                createdAt: Date.now(),
+                messages: [
+                    {
+                        sender: 'assistant',
+                        text: 'Sistemas integrados. Protocolo de voz disponível. O que você precisa, comandante?'
+                    }
+                ]
+            }
+        ];
+        conversations = nextConversations;
+        activeConversationId = firstId;
+        saveConversations(conversations);
+        saveActiveConversationId(firstId);
+        render();
+        try {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('open')) {
+                // mantém aberto
+            }
+        } catch (_) {}
+    }
+
     function clearChat() {
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        chatBox.innerHTML = `
-            <div class="message-wrapper assistant">
-                <div class="message-content">Sistemas sincronizados. Canal limpo para nova operação.</div>
-            </div>
-        `;
+        const convNow = getActiveConversationObj();
+        if (!convNow) {
+            startNewConversation();
+            return;
+        }
+        const nextMessages = [
+            {
+                sender: 'assistant',
+                text: 'Sistemas sincronizados. Canal limpo para nova operação.'
+            }
+        ];
+        persistActiveConversation(nextMessages);
+        render();
     }
 </script>
 </body>
