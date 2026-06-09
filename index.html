@@ -394,8 +394,9 @@
     const STORAGE_KEY = 'nobap_jarvis_conversations_v1';
     const ACTIVE_KEY = 'nobap_jarvis_active_conversation_v1';
 
-    const SUPABASE_URL = window.SUPABASE_URL || '';
-    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://azbjozekbvvbwsksnohx.supabase.co';
+    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6YmpvemVrYnZ2Yndza3Nub2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MjI3MTUsImV4cCI6MjA5NjM5ODcxNX0.2skfHWUyI6Y7pumENMvvK1d1atqKmPEksDFDBHMhH4k';
+
 
     let supabase = null;
     if (SUPABASE_URL && SUPABASE_ANON_KEY) {
