@@ -399,15 +399,19 @@
 
 
     let supabase = null;
-    // Carrega o SDK via ESM static import (evita problemas com top-level await em alguns ambientes)
-    // eslint-disable-next-line no-unused-vars
-    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
 
-    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true }
-        });
+    async function initSupabase() {
+        // Carrega o SDK sem usar `await` no top-level (evita erro em pages estáticas)
+        const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        const { createClient } = mod;
+
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: { persistSession: true }
+            });
+        }
     }
+
 
 
     async function getAccessToken() {
@@ -741,10 +745,16 @@
         applyTheme('dark');
     }
 
-    if (supabase) {
-        supabase.auth.onAuthStateChange(() => syncAuthUI());
-        await syncAuthUI();
-    }
+    // init supabase depois que o script carregar
+    initSupabase().then(() => {
+        if (supabase) {
+            supabase.auth.onAuthStateChange(() => syncAuthUI());
+            syncAuthUI();
+        }
+    }).catch((e) => {
+        console.error('[Supabase] init error:', e);
+    });
+
 
 
 
