@@ -750,6 +750,8 @@
         const text = userInput.value.trim();
         if (!text) return;
 
+        // Para o endpoint /api/chat, o backend valida token via Supabase admin.
+        // Se o usuário não estiver logado, mostra erro e não “some” a mensagem.
         const accessToken = await requireLoginOrThrow();
 
         const conv = getActiveConversationObj();
