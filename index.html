@@ -797,7 +797,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
-            const accessToken = await requireLoginOrThrow();
+            // /api/chat já pode funcionar sem Supabase (depende só do GROQ_API_KEY no servidor)
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: {
