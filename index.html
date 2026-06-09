@@ -673,8 +673,10 @@
                     return;
                 }
 
-                // Use o endereço completo atual para evitar divergência de path/origin.
-                const redirectTo = window.location.href;
+                // Força redirect para bater exatamente com o OAuth configurado no Google.
+                // Use seu domínio público (Vercel) sem depender do origin/path do Supabase.
+                const redirectTo = 'https://nobap-ia.vercel.app/';
+
 
                 alert('Iniciando Login Google...\nRedirectTo: ' + redirectTo);
 
