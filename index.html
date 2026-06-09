@@ -862,9 +862,30 @@
         if (!supabase) return;
         const { data } = await supabase.auth.getSession();
         const loggedIn = !!data?.session;
+
+        // alterna tela de login vs app
+        const authGate = document.getElementById('auth-gate');
+        const appShell = document.getElementById('app-shell');
+        if (authGate) authGate.style.display = loggedIn ? 'none' : 'flex';
+        if (appShell) appShell.style.display = loggedIn ? 'block' : 'none';
+
         if (logoutBtn) logoutBtn.style.display = loggedIn ? 'block' : 'none';
         if (loginGoogleBtn) loginGoogleBtn.style.display = loggedIn ? 'none' : 'block';
+
+        // força render do chat quando entrar
+        if (loggedIn) {
+            try {
+                render();
+                // abre sidebar no primeiro acesso (opcional)
+                const sidebar = document.getElementById('sidebar');
+                const toggle = document.getElementById('sidebar-toggle');
+                if (sidebar && toggle && !sidebar.classList.contains('open')) {
+                    // deixa recolhida inicialmente; não abrir automaticamente
+                }
+            } catch (_) {}
+        }
     }
+
 
     // Tema
     const THEME_KEY = 'nobap_jarvis_theme_v1';
