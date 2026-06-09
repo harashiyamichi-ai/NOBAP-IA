@@ -11,51 +11,57 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
         }
 
-:root {
-            --bg-deep: #08080c;        
-            --bg-sidebar: #040406;     
-            --nobap-purple: #4fffb0;
-            --nobap-glow: rgba(155, 89, 182, 0.6);
-            --text-pure: #ffffff;
-            --text-muted: #828292;
-            --border-glass: rgba(155, 89, 182, 0.15);
+        :root {
+            /* ChatGPT-like neutrals */
+            --bg: #0b0b0f;
+            --panel: #12121a;
+            --panel-2: #1a1a26;
+            --text: rgba(255,255,255,0.92);
+            --muted: rgba(255,255,255,0.6);
+            --border: rgba(255,255,255,0.08);
+            --border-2: rgba(255,255,255,0.12);
 
-            --chat-user-bg: rgba(155, 89, 182, 0.22);
-            --chat-user-bd: rgba(155, 89, 182, 0.55);
-            --chat-assistant-bg: rgba(255, 255, 255, 0.06);
-            --chat-assistant-bd: rgba(255, 255, 255, 0.12);
+            --chat-bg: #0b0b0f;
+            --bubble-user: rgba(124, 58, 237, 0.18);
+            --bubble-assistant: rgba(255,255,255,0.06);
+            --bubble-user-border: rgba(124, 58, 237, 0.35);
+            --bubble-assistant-border: rgba(255,255,255,0.12);
 
-            --chat-loading-bg: rgba(255, 255, 255, 0.06);
-            --chat-loading-bd: rgba(255, 255, 255, 0.12);
+            --input-bg: rgba(18,18,26,0.65);
+            --input-border: rgba(255,255,255,0.12);
+            --shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+            --primary: #a78bfa;
+            --primary-2: #8b5cf6;
         }
 
         body.theme-light {
-            --bg-deep: #f5f6fb;
-            --bg-sidebar: #ffffff;
-            --text-pure: #0c0f16;
-            --text-muted: rgba(12, 15, 22, 0.55);
-            --border-glass: rgba(155, 89, 182, 0.18);
+            --bg: #f5f6fb;
+            --panel: #ffffff;
+            --panel-2: #f3f4f6;
+            --text: rgba(13, 16, 26, 0.92);
+            --muted: rgba(13, 16, 26, 0.55);
+            --border: rgba(13,16,26,0.08);
+            --border-2: rgba(13,16,26,0.12);
 
-            --chat-user-bg: rgba(155, 89, 182, 0.12);
-            --chat-user-bd: rgba(155, 89, 182, 0.5);
-            --chat-assistant-bg: rgba(12, 15, 22, 0.04);
-            --chat-assistant-bd: rgba(12, 15, 22, 0.12);
+            --chat-bg: #f5f6fb;
+            --bubble-user: rgba(124, 58, 237, 0.14);
+            --bubble-assistant: rgba(13,16,26,0.04);
+            --bubble-user-border: rgba(124, 58, 237, 0.28);
+            --bubble-assistant-border: rgba(13,16,26,0.12);
 
-            --chat-loading-bg: rgba(12, 15, 22, 0.04);
-            --chat-loading-bd: rgba(12, 15, 22, 0.12);
-
-            /* garante que o input/container mude no modo claro */
-            --input-container-bg: rgba(255, 255, 255, 0.85);
-            --input-container-border: rgba(155, 89, 182, 0.18);
+            --input-bg: rgba(255,255,255,0.78);
+            --input-border: rgba(13,16,26,0.12);
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
         body {
             display: flex;
-            background-color: var(--bg-deep);
-            color: var(--text-pure);
+            background-color: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             height: 100vh;
             overflow: hidden;
@@ -118,9 +124,13 @@
             width: min(520px, 92vw);
             padding: 22px 20px;
             border-radius: 18px;
-            border: 1px solid rgba(155, 89, 182, 0.25);
-            background: rgba(15, 15, 22, 0.82);
-            box-shadow: 0 20px 80px rgba(0,0,0,0.55);
+            border: 1px solid var(--border);
+            background: rgba(18, 18, 26, 0.88);
+            box-shadow: var(--shadow);
+        }
+
+        body.theme-light .auth-card {
+            background: rgba(255,255,255,0.9);
         }
 
         .auth-brand {
@@ -206,21 +216,26 @@
 
         .sidebar-toggle {
             position: fixed;
-            left: 14px;
-            top: 14px;
+            left: 12px;
+            top: 12px;
             z-index: 1000;
-            border: 1px solid rgba(155, 89, 182, 0.35);
-            background: rgba(15, 15, 22, 0.65);
-            color: white;
-            border-radius: 16px;
-            padding: 10px 12px;
+            border: 1px solid var(--border);
+            background: rgba(18,18,26,0.85);
+            color: var(--text);
+            border-radius: 14px;
+            padding: 8px 10px;
             cursor: pointer;
-            font-weight: 900;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
             display: flex;
             align-items: center;
             gap: 8px;
             user-select: none;
+            backdrop-filter: blur(10px);
+        }
+
+        body.theme-light .sidebar-toggle {
+            background: rgba(255,255,255,0.9);
         }
 
         .sidebar-toggle-underscore { color: var(--nobap-purple); text-shadow: 0 0 12px var(--nobap-glow); }
@@ -234,48 +249,53 @@
             height: 100vh;
         }
 
-        /* --- SIDEBAR PREMIUM --- */
+        /* --- SIDEBAR (ChatGPT-like) --- */
         .sidebar {
             width: 260px;
-            background-color: var(--bg-sidebar);
-            padding: 25px 15px;
+            background-color: var(--panel);
+            padding: 18px 14px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            border-right: 1px solid var(--border-glass);
+            gap: 14px;
+            border-right: 1px solid var(--border);
         }
 
         .brand {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 800;
-            letter-spacing: 3px;
-            text-align: center;
-            color: var(--text-pure);
-            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            text-align: left;
+            color: var(--text);
+            text-transform: none;
+            opacity: 0.95;
         }
 
         .brand span {
-            color: var(--nobap-purple);
-            text-shadow: 0 0 10px var(--nobap-glow);
+            color: var(--primary);
+            text-shadow: none;
+        }
+
+        .menu-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .new-chat-btn {
-            background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), transparent);
-            color: var(--text-pure);
-            border: 1px solid var(--nobap-purple);
-            padding: 12px 20px;
-            border-radius: 12px;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 700;
+            transition: background 0.15s ease, border-color 0.15s ease;
         }
 
         .new-chat-btn:hover {
-            background: var(--nobap-purple);
-            box-shadow: 0 0 20px var(--nobap-glow);
-            transform: translateY(-1px);
+            background: rgba(167,139,250,0.12);
+            border-color: rgba(167,139,250,0.35);
         }
 
         .history-list {
@@ -283,19 +303,23 @@
             overflow-y: auto;
         }
 
-        /* --- CHAT INTERFACE --- */
+        .history-list button {
+            backdrop-filter: blur(8px);
+        }
+
+        /* --- CHAT INTERFACE (ChatGPT-like) --- */
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background-color: var(--bg-deep);
+            background-color: var(--chat-bg);
             position: relative;
         }
 
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 30px 0;
+            padding: 32px 0 0 0;
             display: flex;
             flex-direction: column;
         }
@@ -303,8 +327,8 @@
         .message-wrapper {
             width: 100%;
             display: flex;
-            padding: 10px 20px;
-            animation: fadeIn 0.4s ease-out;
+            padding: 8px 20px;
+            animation: fadeIn 0.25s ease-out;
         }
 
         .message-wrapper.assistant {
@@ -316,144 +340,131 @@
         }
 
         .message-content {
-            max-width: 768px;
+            max-width: 760px;
             width: 100%;
-            font-size: 16px;
-
-            line-height: 1.62;
+            font-size: 14.5px;
+            line-height: 1.6;
             word-wrap: break-word;
             white-space: pre-wrap;
 
-            padding: 12px 14px;
-            border-radius: 16px;
+            padding: 10px 12px;
+            border-radius: 14px;
             border: 1px solid transparent;
             background: transparent;
+            box-shadow: none;
         }
 
         .message-wrapper.user .message-content {
-            background: var(--chat-user-bg);
-            border-color: var(--chat-user-bd);
+            background: var(--bubble-user);
+            border-color: var(--bubble-user-border);
         }
 
         .message-wrapper.assistant .message-content {
-            background: var(--chat-assistant-bg);
-            border-color: var(--chat-assistant-bd);
+            background: var(--bubble-assistant);
+            border-color: var(--bubble-assistant-border);
         }
 
-        .message-wrapper.user .message-content::before {
-            content: "Você";
-            display: block;
-            font-weight: 700;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
+        /* Remove labels (ChatGPT não mostra "Você"/nome como pseudo-elemento) */
+        .message-wrapper.user .message-content::before,
         .message-wrapper.assistant .message-content::before {
-            content: "Jarvis // Nobap AI";
-            display: block;
-            font-weight: 700;
-            font-size: 12px;
-            color: var(--nobap-purple);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 8px rgba(155, 89, 182, 0.3);
+            content: none !important;
         }
 
-        /* --- FUTURISTIC INPUT BAR WITH AUDIO --- */
+        /* --- INPUT (ChatGPT-like) --- */
         .input-container-wrapper {
             width: 100%;
             display: flex;
             justify-content: center;
-            padding: 30px 20px;
-            background: linear-gradient(transparent, var(--bg-deep) 40%);
+            padding: 20px 20px 26px 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.0) 0%, var(--bg) 30%);
         }
 
         .input-container {
-            max-width: 768px;
+            max-width: 760px;
             width: 100%;
-            background-color: var(--input-container-bg, rgba(15, 15, 22, 0.8));
-            border: 1px solid var(--input-container-border, var(--border-glass));
-            border-radius: 16px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 20px;
             display: flex;
-            align-items: center;
-            padding: 14px 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            align-items: flex-end;
+            padding: 12px 14px;
+            box-shadow: var(--shadow);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            gap: 10px;
         }
 
-
         .input-container:focus-within {
-            border-color: var(--nobap-purple);
-            box-shadow: 0 0 25px rgba(155, 89, 182, 0.15), 0 10px 40px rgba(0, 0, 0, 0.6);
+            border-color: rgba(167,139,250,0.65);
+            box-shadow: 0 0 0 3px rgba(167,139,250,0.18), var(--shadow);
         }
 
         #user-input {
             flex: 1;
             background: transparent;
             border: none;
-            color: var(--text-pure);
+            color: var(--text);
             resize: none;
             outline: none;
-            font-size: 16px;
-            max-height: 200px;
+            font-size: 14.5px;
+            max-height: 160px;
             height: 24px;
-            line-height: 24px;
+            line-height: 20px;
+            padding: 6px 0;
         }
 
         #user-input::placeholder {
-            color: var(--text-muted);
+            color: var(--muted);
         }
 
-        /* BOTÃO DE MICROFONE */
+        /* BOTÃO DE MICROFONE (keep functionality, make it ChatGPT-like) */
         .audio-btn {
             background: transparent;
-            border: none;
-            color: var(--text-muted);
-            width: 36px;
-            height: 36px;
+            border: 1px solid transparent;
+            color: var(--muted);
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            margin-left: 5px;
-            position: relative;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            margin-left: 0;
         }
 
         .audio-btn:hover {
-            color: var(--nobap-purple);
+            background: rgba(167,139,250,0.12);
+            border-color: rgba(167,139,250,0.28);
+            color: var(--text);
         }
 
         /* Animação quando o microfone está gravando */
         .audio-btn.recording {
-            color: #ff3366;
+            color: #ff5c7a;
             animation: pulseRecord 1.5s infinite ease-in-out;
         }
 
         #send-btn {
-            background: var(--text-pure);
+            background: var(--primary);
             border: none;
-            color: var(--bg-deep);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            color: rgba(0,0,0,0.85);
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            margin-left: 10px;
+            transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
         }
 
         #send-btn:hover {
-            background: var(--nobap-purple);
-            color: var(--text-pure);
-            box-shadow: 0 0 15px var(--nobap-glow);
-            transform: scale(1.05);
+            filter: brightness(1.04);
+            transform: scale(1.03);
+        }
+
+        #send-btn:active {
+            transform: scale(0.98);
         }
 
         /* --- JARVIS PULSE EFFECT --- */
