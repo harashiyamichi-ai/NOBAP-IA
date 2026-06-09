@@ -759,8 +759,8 @@
         nextMessagesAfterUser.push({ sender: 'user', text });
         persistActiveConversation(nextMessagesAfterUser);
 
-        // grava no banco
-        if (conv.id) {
+        // grava no banco (se Supabase estiver configurado)
+        if (conv.id && typeof accessToken === 'string' && accessToken) {
             await fetch('/api/conversations', {
                 method: 'POST',
                 headers: {
@@ -816,9 +816,7 @@
                 '').trim();
 
             if (rawResponse) {
-                const nextMessagesAfterAssistant = [...(getActiveConversationObj()?.messages || nextMessagesAfterUser)];
-
-                // 1. Inicia o efeito visual de digitação
+            // 1. Inicia o efeito visual de digitação
                 typeEffect(content, rawResponse, 15, () => {
                     const convNow = getActiveConversationObj();
                     const msgs = convNow ? convNow.messages || [] : [];
