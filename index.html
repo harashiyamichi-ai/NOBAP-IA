@@ -662,21 +662,41 @@
 
     if (loginGoogleBtn) {
         loginGoogleBtn.addEventListener('click', async () => {
-            if (!supabase) return alert('Supabase não configurado. Defina window.SUPABASE_URL e window.SUPABASE_ANON_KEY');
-            const redirectTo = window.location.origin + window.location.pathname;
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo }
-            });
-            if (error) {
-                console.error('OAuth error:', error);
-                alert('Login Google falhou: ' + (error.message || JSON.stringify(error)));
-                return;
-            }
-            console.log('OAuth iniciado:', data);
+            try {
+                console.log('[OAuth] Clique login Google. supabase=', !!supabase, 'url=', window.location.href);
+                if (!supabase) {
+                    alert('Supabase não inicializado (supabase=null).');
+                    return;
+                }
 
+                // Use o endereço completo atual para evitar divergência de path/origin.
+                const redirectTo = window.location.href;
+
+                alert('Iniciando Login Google...\nRedirectTo: ' + redirectTo);
+
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo,
+                        // recomendado para SPA
+                        flowType: 'pkce'
+                    }
+                });
+
+                if (error) {
+                    console.error('[OAuth] error:', error);
+                    alert('Login Google falhou: ' + (error.message || JSON.stringify(error)));
+                    return;
+                }
+
+                console.log('[OAuth] iniciado:', data);
+            } catch (e) {
+                console.error('[OAuth] exception:', e);
+                alert('Erro inesperado no Login Google: ' + (e?.message || String(e)));
+            }
         });
     }
+
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
