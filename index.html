@@ -14,7 +14,7 @@
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
 
-        :root {
+:root {
             --bg-deep: #08080c;        
             --bg-sidebar: #040406;     
             --nobap-purple: #9b59b6;   
@@ -22,7 +22,36 @@
             --text-pure: #ffffff;
             --text-muted: #828292;
             --border-glass: rgba(155, 89, 182, 0.15);
+
+            --chat-user-bg: rgba(155, 89, 182, 0.22);
+            --chat-user-bd: rgba(155, 89, 182, 0.55);
+            --chat-assistant-bg: rgba(255, 255, 255, 0.06);
+            --chat-assistant-bd: rgba(255, 255, 255, 0.12);
+
+            --chat-loading-bg: rgba(255, 255, 255, 0.06);
+            --chat-loading-bd: rgba(255, 255, 255, 0.12);
         }
+
+        body.theme-light {
+            --bg-deep: #f5f6fb;
+            --bg-sidebar: #ffffff;
+            --text-pure: #0c0f16;
+            --text-muted: rgba(12, 15, 22, 0.55);
+            --border-glass: rgba(155, 89, 182, 0.18);
+
+            --chat-user-bg: rgba(155, 89, 182, 0.12);
+            --chat-user-bd: rgba(155, 89, 182, 0.5);
+            --chat-assistant-bg: rgba(12, 15, 22, 0.04);
+            --chat-assistant-bd: rgba(12, 15, 22, 0.12);
+
+            --chat-loading-bg: rgba(12, 15, 22, 0.04);
+            --chat-loading-bd: rgba(12, 15, 22, 0.12);
+
+            /* garante que o input/container mude no modo claro */
+            --input-container-bg: rgba(255, 255, 255, 0.85);
+            --input-container-border: rgba(155, 89, 182, 0.18);
+        }
+
 
         body {
             display: flex;
@@ -127,6 +156,21 @@
             line-height: 1.62;
             word-wrap: break-word;
             white-space: pre-wrap;
+
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            background: transparent;
+        }
+
+        .message-wrapper.user .message-content {
+            background: var(--chat-user-bg);
+            border-color: var(--chat-user-bd);
+        }
+
+        .message-wrapper.assistant .message-content {
+            background: var(--chat-assistant-bg);
+            border-color: var(--chat-assistant-bd);
         }
 
         .message-wrapper.user .message-content::before {
@@ -164,8 +208,8 @@
         .input-container {
             max-width: 768px;
             width: 100%;
-            background-color: rgba(15, 15, 22, 0.8);
-            border: 1px solid var(--border-glass);
+            background-color: var(--input-container-bg, rgba(15, 15, 22, 0.8));
+            border: 1px solid var(--input-container-border, var(--border-glass));
             border-radius: 16px;
             display: flex;
             align-items: center;
@@ -173,6 +217,7 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
 
         .input-container:focus-within {
             border-color: var(--nobap-purple);
@@ -249,7 +294,31 @@
             display: inline-flex;
             gap: 4px;
             align-items: center;
-            margin-top: 5px;
+            justify-content: center;
+        }
+
+        /* “Carregando” estilo WhatsApp (bolinhas) */
+        .typing-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 2px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--chat-assistant-bd);
+            opacity: 0.55;
+            animation: typingBounce 0.9s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.12s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.24s; }
+
+        @keyframes typingBounce {
+            0%, 100% { transform: translateY(0); opacity: 0.45; }
+            50% { transform: translateY(-4px); opacity: 0.95; }
         }
 
         .pulse-dot {
@@ -286,7 +355,16 @@
     <aside class="sidebar">
         <div class="brand">Nobap<span>_</span></div>
         <button class="new-chat-btn" onclick="clearChat()">+ Novo Registro</button>
+        <div style="display:flex;gap:10px;">
+            <button id="login-google-btn" style="flex:1;background:transparent;border:1px solid rgba(155, 89, 182, 0.4);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;">Login Google</button>
+            <button id="logout-btn" style="flex:1;background:rgba(155, 89, 182, 0.12);border:1px solid rgba(155, 89, 182, 0.45);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;display:none;">Sair</button>
+        </div>
+
         <div class="history-list"></div>
+
+        <div style="display:flex;gap:10px;">
+            <button id="theme-toggle-btn" style="flex:1;background:rgba(155, 89, 182, 0.12);border:1px solid rgba(155, 89, 182, 0.45);color:white;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;">Tema: Escuro</button>
+        </div>
     </aside>
 
     <main class="chat-area">
@@ -315,6 +393,30 @@
 
     const STORAGE_KEY = 'nobap_jarvis_conversations_v1';
     const ACTIVE_KEY = 'nobap_jarvis_active_conversation_v1';
+
+    const SUPABASE_URL = window.SUPABASE_URL || '';
+    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+
+    let supabase = null;
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+        // usa o SDK via ESM import dinâmica quando disponível
+        supabase = (await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm')).createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: true }
+        });
+    }
+
+    async function getAccessToken() {
+        if (!supabase) return null;
+        const { data } = await supabase.auth.getSession();
+        return data?.session?.access_token || null;
+    }
+
+    async function requireLoginOrThrow() {
+        const token = await getAccessToken();
+        if (!token) throw new Error('Not logged in');
+        return token;
+    }
+
 
     function uid() {
         return Math.random().toString(16).slice(2) + Date.now().toString(16);
@@ -549,6 +651,71 @@
         }
     });
 
+    const loginGoogleBtn = document.getElementById('login-google-btn');
+
+    const logoutBtn = document.getElementById('logout-btn');
+
+    if (loginGoogleBtn) {
+        loginGoogleBtn.addEventListener('click', async () => {
+            if (!supabase) return alert('Supabase não configurado. Defina window.SUPABASE_URL e window.SUPABASE_ANON_KEY');
+            const redirectTo = window.location.origin + window.location.pathname;
+            await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo }
+            });
+        });
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            if (!supabase) return;
+            await supabase.auth.signOut();
+            render();
+        });
+    }
+
+    async function syncAuthUI() {
+        if (!supabase) return;
+        const { data } = await supabase.auth.getSession();
+        const loggedIn = !!data?.session;
+        if (logoutBtn) logoutBtn.style.display = loggedIn ? 'block' : 'none';
+        if (loginGoogleBtn) loginGoogleBtn.style.display = loggedIn ? 'none' : 'block';
+    }
+
+    // Tema
+    const THEME_KEY = 'nobap_jarvis_theme_v1';
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+
+    function applyTheme(theme) {
+        const isLight = theme === 'light';
+        document.body.classList.toggle('theme-light', isLight);
+        if (themeToggleBtn) themeToggleBtn.textContent = `Tema: ${isLight ? 'Claro' : 'Escuro'}`;
+        try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const current = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+            applyTheme(current === 'light' ? 'dark' : 'light');
+        });
+    }
+
+    // carrega tema salvo
+    try {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === 'light' || saved === 'dark') applyTheme(saved);
+        else applyTheme('dark');
+    } catch (_) {
+        applyTheme('dark');
+    }
+
+    if (supabase) {
+        supabase.auth.onAuthStateChange(() => syncAuthUI());
+        await syncAuthUI();
+    }
+
+
+
     function appendMessage(text, sender) {
         const wrapper = document.createElement('div');
         wrapper.className = `message-wrapper ${sender}`;
@@ -582,14 +749,35 @@
         const text = userInput.value.trim();
         if (!text) return;
 
+        const accessToken = await requireLoginOrThrow();
+
         const conv = getActiveConversationObj();
         if (!conv) return;
 
+        // atualiza local (cache) para não travar UI
         const nextMessagesAfterUser = [...(conv.messages || [])];
         nextMessagesAfterUser.push({ sender: 'user', text });
         persistActiveConversation(nextMessagesAfterUser);
 
+        // grava no banco
+        if (conv.id) {
+            await fetch('/api/conversations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    action: 'append',
+                    conversationId: conv.id,
+                    sender: 'user',
+                    content: text
+                })
+            });
+        }
+
         appendMessage(text, 'user');
+
         userInput.value = '';
         userInput.style.height = '24px';
 
@@ -598,10 +786,10 @@
         const content = document.createElement('div');
         content.className = 'message-content';
         content.innerHTML = `
-            <div class="jarvis-pulse">
-                <div class="pulse-dot"></div>
-                <div class="pulse-dot"></div>
-                <div class="pulse-dot"></div>
+            <div class="typing-bubble" aria-label="Carregando">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
             </div>
         `;
         wrapper.appendChild(content);
@@ -609,13 +797,18 @@
         chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
+            const accessToken = await requireLoginOrThrow();
             const response = await fetch("/api/chat", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`
+                },
                 body: JSON.stringify({ text: text })
             });
 
             const data = await response.json();
+
 
             const rawResponse = (data?.content ??
                 data?.choices?.[0]?.message?.content ??
