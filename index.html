@@ -21,29 +21,41 @@
         }
 
 
-        :root {
-            /* ChatGPT-like neutrals */
-            --bg: #0b0b0f;
-            --panel: #12121a;
-            --panel-2: #1a1a26;
-            --text: rgba(255,255,255,0.92);
+        :root{
+
+            --primary:#9b59b6;
+            --primary-2:#b57aff;
+
+            --bg:#0c0d12;
+            --panel:#11131a;
+
+            --panel-2:#181b23;
+
+            --text:#ffffff;
+
+            --border:rgba(255,255,255,.08);
+
+            --bubble-user:
+            rgba(155,89,182,.20);
+
+            --bubble-user-border:
+            rgba(155,89,182,.45);
+
+            --bubble-assistant:
+            rgba(255,255,255,.04);
+
+            --bubble-assistant-border:
+            rgba(255,255,255,.08);
+
             --muted: rgba(255,255,255,0.6);
-            --border: rgba(255,255,255,0.08);
             --border-2: rgba(255,255,255,0.12);
 
-            --chat-bg: #0b0b0f;
-            --bubble-user: rgba(124, 58, 237, 0.18);
-            --bubble-assistant: rgba(255,255,255,0.06);
-            --bubble-user-border: rgba(124, 58, 237, 0.35);
-            --bubble-assistant-border: rgba(255,255,255,0.12);
-
+            --chat-bg:#0c0d12;
             --input-bg: rgba(18,18,26,0.65);
             --input-border: rgba(255,255,255,0.12);
             --shadow: 0 10px 30px rgba(0,0,0,0.35);
-
-            --primary: #a78bfa;
-            --primary-2: #8b5cf6;
         }
+
 
         body.theme-light {
             --bg: #f5f6fb;
@@ -352,16 +364,16 @@
             justify-content: flex-end;
         }
 
-        .message-content {
-            max-width: 760px;
+.message-content {
+            max-width: 850px;
             width: 100%;
-            font-size: 14.5px;
-            line-height: 1.6;
+            font-size: 15px;
+            line-height: 1.8;
             word-wrap: break-word;
             white-space: pre-wrap;
 
-            padding: 10px 12px;
-            border-radius: 14px;
+            padding: 16px 20px;
+            border-radius: 18px;
             border: 1px solid transparent;
             background: transparent;
             box-shadow: none;
