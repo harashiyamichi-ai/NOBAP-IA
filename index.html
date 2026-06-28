@@ -1156,31 +1156,29 @@
 
 
     function startNewConversation() {
-        // recria conversa local
-        const firstId = uid();
-        const nextConversations = [
-            {
-                id: firstId,
-                createdAt: Date.now(),
-                messages: [
-                    {
-                        sender: 'assistant',
-                        text: 'Sistemas integrados. Protocolo de voz disponível. O que você precisa, comandante?'
-                    }
-                ]
-            }
-        ];
-        conversations = nextConversations;
-        activeConversationId = firstId;
+        const newId = uid();
+        const newConv = {
+            id: newId,
+            createdAt: Date.now(),
+            messages: [
+                {
+                    sender: 'assistant',
+                    text: 'Sistemas integrados. Protocolo de voz disponível. O que você precisa, comandante?'
+                }
+            ]
+        };
+
+        // CORREÇÃO: Adiciona a nova conversa ao topo da lista sem apagar as antigas
+        conversations.unshift(newConv);
+
+        activeConversationId = newId;
         saveConversations(conversations);
-        saveActiveConversationId(firstId);
+        saveActiveConversationId(newId);
         render();
-        try {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.classList.contains('open')) {
-                // mantém aberto
-            }
-        } catch (_) {}
+
+        // Fecha a barra lateral no celular após criar o chat (melhor UX)
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.remove('open');
     }
 
 
